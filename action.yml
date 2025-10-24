@@ -1,0 +1,91 @@
+name: 'Deploy Microsoft Fabric workspace items'
+description: 'Composite action to deploy Microsoft Fabric workspace items using fabric-cicd and Az PowerShell authentication.'
+author: 'Enchanted Data'
+inputs:
+  azure-client-id:
+    description: 'Azure Service Principal client id'
+    required: true
+  azure-client-secret:
+    description: 'Azure Service Principal client secret'
+    required: true
+  azure-tenant-id:
+    description: 'Azure Tenant id'
+    required: true
+  workspace-id:
+    description: 'Workspace Id (can be passed or provided via workflow variable)'
+    required: true
+  environment-name:
+    description: 'Target environment name (e.g., Test)'
+    required: false
+    default: 'Test'
+  repository-directory:
+    description: 'Path to repository directory containing workspace items.'
+    required: false
+    default: './workspace'
+  items-in-scope:
+    description: 'ItemsInScope argument passed to the deployment script'
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4.2.2
+
+    - name: Setup Python
+      uses: actions/setup-python@v5.5.0
+      with:
+        python-version: 3.12
+
+    - name: Install fabric-cicd library
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install fabric-cicd
+
+    - name: Authenticate as Service Principal (PowerShell)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        AZURE_CLIENT_ID: ${{ inputs.azure-client-id }}
+        AZURE_CLIENT_SECRET: ${{ inputs.azure-client-secret }}
+        AZURE_TENANT_ID: ${{ inputs.azure-tenant-id }}
+        RESOURCE_URL: 'https://api.fabric.microsoft.com'
+      run: |
+        Install-Module -Name Az.Accounts -AllowClobber -Force -Scope CurrentUser
+
+        $SecureStringPwd = ConvertTo-SecureString $env:AZURE_CLIENT_SECRET -AsPlainText -Force
+        $pscredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $env:AZURE_CLIENT_ID, $SecureStringPwd
+
+        Connect-AzAccount -ServicePrincipal -Credential $pscredential -Tenant $env:AZURE_TENANT_ID
+
+        $fabricToken = (Get-AzAccessToken -ResourceUrl $env:RESOURCE_URL).Token
+        Write-Output "::set-output name=fabric-token::$fabricToken"
+
+    - name: Authenticate as Service Principal (PowerShell on non-Windows)
+      if: runner.os != 'Windows'
+      shell: bash
+      env:
+        AZURE_CLIENT_ID: ${{ inputs.azure-client-id }}
+        AZURE_CLIENT_SECRET: ${{ inputs.azure-client-secret }}
+        AZURE_TENANT_ID: ${{ inputs.azure-tenant-id }}
+        RESOURCE_URL: 'https://api.fabric.microsoft.com'
+      run: |
+        pwsh -Command 'Install-Module -Name Az.Accounts -AllowClobber -Force -Scope CurrentUser'
+        pwsh -Command '$SecureStringPwd = ConvertTo-SecureString "$env:AZURE_CLIENT_SECRET" -AsPlainText -Force; $pscredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "$env:AZURE_CLIENT_ID", $SecureStringPwd; Connect-AzAccount -ServicePrincipal -Credential $pscredential -Tenant "$env:AZURE_TENANT_ID"; $fabricToken = (Get-AzAccessToken -ResourceUrl "$env:RESOURCE_URL").Token; Write-Output "::set-output name=fabric-token::$fabricToken"'
+
+    - name: Deploy whole workspace (no items-in-scope)
+      if: ${{ inputs.items-in-scope == '' }}
+      shell: bash
+      env:
+        FABRIC_TOKEN: ${{ steps.Authenticate_as_Service_Principal.outputs.fabric-token }}
+      run: |
+        python "${{ github.action_path }}/scripts/auth_spn_deploy_all_workspace.py" --WorkspaceId "${{ inputs.workspace-id }}" --Environment "${{ inputs.environment-name }}" --RepositoryDirectory "${{ inputs.repository-directory }}"
+
+    - name: Deploy specific items (items-in-scope provided)
+      if: ${{ inputs.items-in-scope != '' }}
+      shell: bash
+      env:
+        FABRIC_TOKEN: ${{ steps.Authenticate_as_Service_Principal.outputs.fabric-token }}
+      run: |
+        python "${{ github.action_path }}/scripts/auth_spn_deploy_fabric_items.py" --WorkspaceId "${{ inputs.workspace-id }}" --Environment "${{ inputs.environment-name }}" --RepositoryDirectory "${{ inputs.repository-directory }}" --ItemsInScope "${{ inputs.items-in-scope }}"
