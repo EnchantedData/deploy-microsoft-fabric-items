@@ -1,6 +1,6 @@
 # Deploy Microsoft Fabric workspace items
 
-This composite GitHub Action performs the following steps to deploy Microsoft Fabric items to a new workspace, based on a repository that has been configured with [Microsoft Fabric Git integration](https://learn.microsoft.com/en-us/fabric/cicd/git-integration/intro-to-git-integration?tabs=azure-devops):
+This composite GitHub Action performs the following steps to deploy Microsoft Fabric items to a  workspace. By deploying metadata about the items that are stored within a Git repository that has been connected to a Microsoft fabric workspace with [Microsoft Fabric Git integration](https://learn.microsoft.com/en-us/fabric/cicd/git-integration/intro-to-git-integration?tabs=azure-devops):
 
 - Checks out the repository
 - Sets up Python
