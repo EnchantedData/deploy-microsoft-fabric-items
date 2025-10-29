@@ -40,7 +40,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Deploy Fabric items
-        uses: ./.github/actions/deploy-microsoft-fabric-workspace-items
+        uses: EnchantedData/deploy-microsoft-fabric-items@v1.0.0
         with:
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
