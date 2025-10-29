@@ -15,6 +15,7 @@ Inputs
 - `azure-tenant-id` (required) - Azure tenant id (can be passed from [encrypted secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets?WT.mc_id=DP-MVP-5004032)).
 - `workspace-id` (required) - Workspace id to pass to the script (can also be provided via repo variables).
 - `environment-name` (optional) - Environment string (default: `Test`,can also be provided via repo variables).
+- `fabric-cicd-version` (optional) - Specific version of fabric-cicd library (default: ``,can also be provided via repo variables). Latest version installed when not specified.
 - `repository-directory` (optional) - Path to repository directory containing workspace items (default: `./workspace`, can also be provided via repo variables).
 - `items-in-scope` (optional) - ItemsInScope argument for the script. When left blank all supported items are deployed to the workspace specified (can also be provided via repo variables).
 
@@ -44,6 +45,7 @@ jobs:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           workspace-id: ${{ vars.TestWorkspace }}
           environment-name: 'Test'
+          fabric-cicd-version: '0.1.30'
           repository-directory: './workspace'
           items-in-scope: ${{ vars.ItemsInScope }}
 
