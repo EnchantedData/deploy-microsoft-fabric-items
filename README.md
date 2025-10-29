@@ -28,7 +28,7 @@ Notes:
 - Only the metadata is deployed, not the data within items themselves.
 - You can utilize [fabric-cicd parameterization](https://microsoft.github.io/fabric-cicd/latest/how_to/parameterization/) providing that the `parameter.yml` file is in your own repository.
 - Has been tested with latest versions of windows and ubuntu hosted runers.
-- Additional examples can be found in the [GH-deploy-microsoft-fabric-items-examples GitHub repository] (https://github.com/EnchantedData/GH-deploy-microsoft-fabric-items-examples)
+- Additional examples can be found in the [GH-deploy-microsoft-fabric-items-examples GitHub repository](https://github.com/EnchantedData/GH-deploy-microsoft-fabric-items-examples)
 
 Usage
 
