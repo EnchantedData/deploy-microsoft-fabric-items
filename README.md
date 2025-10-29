@@ -2,7 +2,7 @@
 
 This composite GitHub Action performs the following steps to deploy Microsoft Fabric items to a workspace. By deploying metadata about the items that are stored within a Git repository that has been connected to a Microsoft Fabric workspace with [Microsoft Fabric Git integration](https://learn.microsoft.com/en-us/fabric/cicd/git-integration/intro-to-git-integration?tabs=azure-devops).
 
-This is done with the  using [fabric-cicd](https://github.com/microsoft/fabric-cicd) Python library. The steps performed are as below:
+This is done with the [fabric-cicd](https://github.com/microsoft/fabric-cicd) Python library. The steps performed are as below:
 
 - Checks out the repository
 - Sets up Python
